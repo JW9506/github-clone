@@ -17,6 +17,7 @@
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
+    "baseUrl": ".",
     "resolveJsonModule": true,
     "isolatedModules": true
   },
