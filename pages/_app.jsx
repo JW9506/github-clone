@@ -4,12 +4,12 @@ import "antd/dist/antd.css"
 
 class MyApp extends App {
   static async getInitialProps({ Component, ctx }) {
-    let pageProps = {}
+    let appProps = {}
     if (Component.getInitialProps) {
-      pageProps = await Component.getInitialProps(ctx)
-      pageProps = { pageProps }
+      const pageProps = await Component.getInitialProps(ctx)
+      appProps = { pageProps }
     }
-    return pageProps
+    return appProps
   }
 
   render() {
