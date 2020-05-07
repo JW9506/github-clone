@@ -7,5 +7,6 @@ module.exports = {
         libraryName: "antd",
       },
     ],
+    ["styled-components", { ssr: true }],
   ],
 }
