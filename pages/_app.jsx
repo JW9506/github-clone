@@ -1,6 +1,9 @@
 import App from "next/app"
+import { Provider } from "react-redux"
 import withRedux from "lib/withRedux"
 import "antd/dist/antd.css"
+
+import Layout from "./Layout"
 
 class MyApp extends App {
   static async getInitialProps({ Component, ctx }) {
@@ -14,7 +17,13 @@ class MyApp extends App {
 
   render() {
     const { Component, pageProps, reduxStore } = this.props
-    return <Component {...pageProps} reduxStore={reduxStore} />
+    return (
+      <Layout>
+        <Provider store={reduxStore}>
+          <Component {...pageProps} />
+        </Provider>
+      </Layout>
+    )
   }
 }
 
