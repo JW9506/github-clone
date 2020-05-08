@@ -104,12 +104,17 @@ const MyLayout = ({ children, user, logout }) => {
       `}</style>
       <style jsx global>
         {`
-          .ant-layout,
           #__next {
             height: 100%;
           }
+          .ant-layout {
+            min-height: 100%;
+          }
           .ant-layout-header {
             padding: 0;
+          }
+          .ant-layout-content {
+            background-color: #fff;
           }
         `}
       </style>
