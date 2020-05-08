@@ -27,13 +27,17 @@ const footerStyle = {
 
 const MyLayout = ({ children, user, logout }) => {
   const router = useRouter()
-  const [search, setSearch] = useState("")
+  const [search, setSearch] = useState(
+    (router.query && router.query.query) || ""
+  )
 
   const handleSearchChange = useCallback((e) => {
     setSearch(e.target.value)
   }, [])
 
-  const handleOnSearch = useCallback(() => {}, [])
+  const handleOnSearch = useCallback(() => {
+    router.push(`/search?query=${search}`)
+  }, [search])
 
   const handleLogout = useCallback(() => {
     logout()
