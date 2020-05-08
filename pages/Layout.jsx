@@ -3,6 +3,7 @@ const { publicRuntimeConfig } = config()
 const { OAUTH_URL } = publicRuntimeConfig
 
 import { useRouter } from "next/router"
+import Link from "next/link"
 import { connect } from "react-redux"
 import { bindActionCreators } from "@reduxjs/toolkit"
 import { useState, useCallback } from "react"
@@ -59,7 +60,9 @@ const MyLayout = ({ children, user, logout }) => {
       <Header>
         <Container comp={<div className="cm-header" />}>
           <div className="header-left">
-            <GithubOutlined style={githubIconStyle} />
+            <Link href="/">
+              <GithubOutlined style={githubIconStyle} />
+            </Link>
             <Input.Search
               placeholder="Search Repo"
               value={search}
