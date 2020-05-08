@@ -3,6 +3,8 @@ import { Button, Layout, Input, Avatar } from "antd"
 import { GithubOutlined, UserOutlined } from "@ant-design/icons"
 const { Header, Footer, Content } = Layout
 
+import Container from "components/container"
+
 const githubIconStyle = {
   fontSize: "2.5rem",
   color: "white",
@@ -25,7 +27,7 @@ export default ({ children }) => {
   return (
     <Layout>
       <Header>
-        <div className="cm-header">
+        <Container comp={<div className="cm-header" />}>
           <div className="header-left">
             <GithubOutlined style={githubIconStyle} />
             <Input.Search
@@ -41,9 +43,11 @@ export default ({ children }) => {
               <Avatar size={40} icon={<UserOutlined />} />
             </div>
           </div>
-        </div>
+        </Container>
       </Header>
-      <Content>{children}</Content>
+      <Content>
+        <Container>{children}</Container>
+      </Content>
       <Footer style={footerStyle}>{new Date().getFullYear()}</Footer>
       <style jsx>{`
         .cm-header {
@@ -61,6 +65,9 @@ export default ({ children }) => {
           .ant-layout,
           #__next {
             height: 100%;
+          }
+          .ant-layout-header {
+            padding: 0;
           }
         `}
       </style>
