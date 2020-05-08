@@ -2,6 +2,7 @@ import config from "next/config"
 const { publicRuntimeConfig } = config()
 const { OAUTH_URL } = publicRuntimeConfig
 
+import { connect } from "react-redux"
 import { useState, useCallback } from "react"
 import { Button, Layout, Input, Avatar } from "antd"
 import { GithubOutlined, UserOutlined } from "@ant-design/icons"
@@ -19,7 +20,7 @@ const footerStyle = {
   textAlign: "center",
 }
 
-export default ({ children }) => {
+const MyLayout = ({ children, user }) => {
   const [search, setSearch] = useState("")
 
   const handleSearchChange = useCallback((e) => {
@@ -80,3 +81,8 @@ export default ({ children }) => {
     </Layout>
   )
 }
+
+const mapStateToProps = (state) => ({
+  user: state.user,
+})
+export default connect(mapStateToProps)(MyLayout)
