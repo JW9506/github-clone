@@ -2,9 +2,11 @@ import config from "next/config"
 const { publicRuntimeConfig } = config()
 const { OAUTH_URL } = publicRuntimeConfig
 
+import { useRouter } from "next/router"
 import { connect } from "react-redux"
 import { bindActionCreators } from "@reduxjs/toolkit"
 import { useState, useCallback } from "react"
+import Axios from "axios"
 import { Button, Layout, Input, Avatar, Tooltip, Dropdown, Menu } from "antd"
 import { GithubOutlined, UserOutlined } from "@ant-design/icons"
 const { Header, Footer, Content } = Layout
@@ -23,6 +25,7 @@ const footerStyle = {
 }
 
 const MyLayout = ({ children, user, logout }) => {
+  const router = useRouter()
   const [search, setSearch] = useState("")
 
   const handleSearchChange = useCallback((e) => {
@@ -33,6 +36,14 @@ const MyLayout = ({ children, user, logout }) => {
 
   const handleLogout = useCallback(() => {
     logout()
+  }, [logout])
+
+  const handleGotoOAuth = useCallback(async (e) => {
+    e.preventDefault()
+    const response = await Axios.get(`/prepare-auth?url=${router.pathname}`)
+    if (response.status === 200) {
+      location.href = OAUTH_URL
+    }
   }, [])
 
   const userDropDown = (
@@ -67,7 +78,7 @@ const MyLayout = ({ children, user, logout }) => {
                 </Dropdown>
               ) : (
                 <Tooltip title="Click to Login" placement="bottom">
-                  <a href={OAUTH_URL}>
+                  <a href={OAUTH_URL} onClick={handleGotoOAuth}>
                     <Avatar size={40} icon={<UserOutlined />} />
                   </a>
                 </Tooltip>
