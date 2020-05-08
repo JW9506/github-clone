@@ -27,6 +27,7 @@ const redis = new IORedis()
   }
 
   server.use(session(SESSION_CONFIG, server))
+
   auth(server)
 
   // server.use(router.routes())

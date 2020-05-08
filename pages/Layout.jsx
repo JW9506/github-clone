@@ -3,12 +3,14 @@ const { publicRuntimeConfig } = config()
 const { OAUTH_URL } = publicRuntimeConfig
 
 import { connect } from "react-redux"
+import { bindActionCreators } from "@reduxjs/toolkit"
 import { useState, useCallback } from "react"
-import { Button, Layout, Input, Avatar } from "antd"
+import { Button, Layout, Input, Avatar, Tooltip, Dropdown, Menu } from "antd"
 import { GithubOutlined, UserOutlined } from "@ant-design/icons"
 const { Header, Footer, Content } = Layout
 
 import Container from "components/container"
+import { logout } from "reduxStore/user"
 
 const githubIconStyle = {
   fontSize: "2.5rem",
@@ -20,7 +22,7 @@ const footerStyle = {
   textAlign: "center",
 }
 
-const MyLayout = ({ children, user }) => {
+const MyLayout = ({ children, user, logout }) => {
   const [search, setSearch] = useState("")
 
   const handleSearchChange = useCallback((e) => {
@@ -28,6 +30,18 @@ const MyLayout = ({ children, user }) => {
   }, [])
 
   const handleOnSearch = useCallback(() => {}, [])
+
+  const handleLogout = useCallback(() => {
+    logout()
+  }, [])
+
+  const userDropDown = (
+    <Menu>
+      <Menu.Item>
+        <button onClick={handleLogout}>Logout</button>
+      </Menu.Item>
+    </Menu>
+  )
 
   return (
     <Layout>
@@ -45,14 +59,18 @@ const MyLayout = ({ children, user }) => {
 
           <div className="header-right">
             <div className="user">
-              {user && user.id ? (
-                <a href="/">
-                  <Avatar size={40} src={user.avatar_url} />
-                </a>
+              {user && user.userInfo && user.userInfo.id ? (
+                <Dropdown overlay={userDropDown}>
+                  <a href="/">
+                    <Avatar size={40} src={user.userInfo.avatar_url} />
+                  </a>
+                </Dropdown>
               ) : (
-                <a href={OAUTH_URL}>
-                  <Avatar size={40} icon={<UserOutlined />} />
-                </a>
+                <Tooltip title="Click to Login" placement="bottom">
+                  <a href={OAUTH_URL}>
+                    <Avatar size={40} icon={<UserOutlined />} />
+                  </a>
+                </Tooltip>
               )}
             </div>
           </div>
@@ -91,4 +109,7 @@ const MyLayout = ({ children, user }) => {
 const mapStateToProps = (state) => ({
   user: state.user,
 })
-export default connect(mapStateToProps)(MyLayout)
+const mapDispatchToProps = (dispatch) => ({
+  logout: bindActionCreators(logout, dispatch),
+})
+export default connect(mapStateToProps, mapDispatchToProps)(MyLayout)
