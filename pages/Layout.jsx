@@ -1,3 +1,7 @@
+import config from "next/config"
+const { publicRuntimeConfig } = config()
+const { OAUTH_URL } = publicRuntimeConfig
+
 import { useState, useCallback } from "react"
 import { Button, Layout, Input, Avatar } from "antd"
 import { GithubOutlined, UserOutlined } from "@ant-design/icons"
@@ -40,7 +44,9 @@ export default ({ children }) => {
 
           <div className="header-right">
             <div className="user">
-              <Avatar size={40} icon={<UserOutlined />} />
+              <a href={OAUTH_URL}>
+                <Avatar size={40} icon={<UserOutlined />} />
+              </a>
             </div>
           </div>
         </Container>
