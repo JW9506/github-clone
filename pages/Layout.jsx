@@ -45,9 +45,15 @@ const MyLayout = ({ children, user }) => {
 
           <div className="header-right">
             <div className="user">
-              <a href={OAUTH_URL}>
-                <Avatar size={40} icon={<UserOutlined />} />
-              </a>
+              {user && user.id ? (
+                <a href="/">
+                  <Avatar size={40} src={user.avatar_url} />
+                </a>
+              ) : (
+                <a href={OAUTH_URL}>
+                  <Avatar size={40} icon={<UserOutlined />} />
+                </a>
+              )}
             </div>
           </div>
         </Container>
