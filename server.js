@@ -6,6 +6,7 @@ const auth = require("./lib/auth")
 const { default: next } = require("next")
 
 const RedisSessionStore = require("./lib/sessionStore")
+const api = require("./lib/api")
 
 const dev = process.env.NODE_ENV !== "production"
 const app = next({ dev })
@@ -29,6 +30,7 @@ const redis = new IORedis()
   server.use(session(SESSION_CONFIG, server))
 
   auth(server)
+  api(server)
 
   // server.use(router.routes())
 
