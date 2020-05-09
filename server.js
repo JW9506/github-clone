@@ -1,6 +1,7 @@
 const Koa = require("koa")
 const Router = require("koa-router")
 const session = require("koa-session")
+const koaBody = require("koa-body")
 const IORedis = require("ioredis")
 const auth = require("./lib/auth")
 const { default: next } = require("next")
@@ -27,6 +28,7 @@ const redis = new IORedis()
     store: new RedisSessionStore(redis),
   }
 
+  server.use(koaBody())
   server.use(session(SESSION_CONFIG, server))
 
   auth(server)
