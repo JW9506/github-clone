@@ -1,32 +1,69 @@
 import config from "next/config"
 import Head from "next/head"
-import { Button } from "antd"
+import { Button, Tabs } from "antd"
 import api from "lib/universalApi"
 import { connect } from "react-redux"
+import { useRouter } from "next/router"
 
 const { publicRuntimeConfig } = config()
 const { OAUTH_URL } = publicRuntimeConfig
+import Repo from "components/Repo"
+import { useEffect } from "react"
+
+let cachedUserRepos, cachedStarred
+const isServer = typeof window === "undefined"
 
 Home.getInitialProps = async (appCtx) => {
   const { ctx, reduxStore } = appCtx
   const { user } = reduxStore.getState()
+
   if (user && user.userInfo == null) {
     return {}
   }
-  const { data: userRepos } = await api.request(
-    { url: "/user/repos" },
-    ctx.req,
-    ctx.res
-  )
-  const { data: starred } = await api.request(
-    { url: "/user/starred" },
-    ctx.req,
-    ctx.res
-  )
+
+  let userRepos, starred
+
+  if (!cachedUserRepos) {
+    const { data } = await api.request({ url: "/user/repos" }, ctx.req, ctx.res)
+    userRepos = data
+  } else {
+    userRepos = cachedUserRepos
+  }
+
+  if (!cachedStarred) {
+    const { data } = await api.request(
+      { url: "/user/starred" },
+      ctx.req,
+      ctx.res
+    )
+    starred = data
+  } else {
+    starred = cachedStarred
+  }
+
+  if (!isServer) {
+    cachedUserRepos = userRepos
+    cachedStarred = starred
+  }
+
   return { userRepos, starred }
 }
 
 function Home({ userInfo, userRepos, starred }) {
+  useEffect(() => {
+    if (!isServer) {
+      cachedUserRepos = userRepos
+      cachedStarred = starred
+    }
+  }, [])
+
+  const router = useRouter()
+  const tabKey = router.query.key || "1"
+
+  const handleTabChange = (activeKey) => {
+    router.push(`/?key=${activeKey}`)
+  }
+
   const content = userInfo ? (
     <div className="Home">
       <div className="user-info">
@@ -36,7 +73,22 @@ function Home({ userInfo, userRepos, starred }) {
         <span className="bio">{userInfo.bio}</span>
       </div>
       <div className="user-repos">
-        <p>User Repos</p>
+        <Tabs
+          defaultActiveKey={tabKey}
+          animated={false}
+          onChange={handleTabChange}
+        >
+          <Tabs.TabPane tab="Repo" key="1">
+            {userRepos.map((repo) => (
+              <Repo key={Math.random().toString().slice(2)} repo={repo} />
+            ))}
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Watching" key="2">
+            {starred.map((repo) => (
+              <Repo key={Math.random().toString().slice(2)} repo={repo} />
+            ))}
+          </Tabs.TabPane>
+        </Tabs>
       </div>
       <style jsx>
         {`
@@ -67,6 +119,9 @@ function Home({ userInfo, userRepos, starred }) {
           .avatar {
             width: 100%;
             border-radius: 0.5rem;
+          }
+          .user-repos {
+            flex-grow: 1;
           }
         `}
       </style>
