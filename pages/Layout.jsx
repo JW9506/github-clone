@@ -111,6 +111,9 @@ const MyLayout = ({ children, user, logout }) => {
       `}</style>
       <style jsx global>
         {`
+          html {
+            font-size: 62.5%;
+          }
           #__next {
             height: 100%;
           }
