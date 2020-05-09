@@ -2,9 +2,8 @@ import { useRouter } from "next/router"
 import Head from "next/head"
 import { Row, Col, List } from "antd"
 import Link from "next/link"
-import clsx from "clsx"
 import api from "lib/universalApi"
-import { useCallback } from "react"
+import { memo } from "react"
 
 const LANGUAGES = ["JavaScript", "HTML", "CSS", "TypeScript", "Java", "Python"]
 const SORT_TYPES = [
@@ -32,6 +31,23 @@ const SORT_TYPES = [
     order: "desc",
   },
 ]
+
+const activeStyle = {
+  borderLeft: "2px solid #e36209",
+  fontWeight: 1000,
+}
+
+const FilterLink = memo(({ query, sort, order, lang, name, page, active }) => {
+  let queryString = `?query=${query}`
+  if (lang) queryString += `&lang=${lang}`
+  if (sort) queryString += `&sort=${sort}&order=${order || "desc"}`
+  if (page) queryString += `&page=${page}`
+  return (
+    <Link href={`/search${queryString}`}>
+      <a style={active ? activeStyle : null}>{name}</a>
+    </Link>
+  )
+})
 
 Search.getInitialProps = async (appCtx) => {
   const { ctx } = appCtx
@@ -62,24 +78,8 @@ Search.getInitialProps = async (appCtx) => {
 function Search({ repos }) {
   const router = useRouter()
 
+  const { ...querys } = router.query
   const { query, sort, order, lang } = router.query
-
-  const doSearch = useCallback(
-    (queryConfig) => {
-      const baseQueryConfig = {
-        query,
-        sort,
-        order,
-        lang,
-      }
-      queryConfig = { ...baseQueryConfig, ...queryConfig }
-      router.push({
-        pathname: "/search",
-        query: queryConfig,
-      })
-    },
-    [query, sort, order, lang]
-  )
 
   return (
     <>
@@ -93,18 +93,24 @@ function Search({ repos }) {
               bordered
               header={<span className="list-header">Language</span>}
               dataSource={LANGUAGES}
-              renderItem={(item) => (
-                <List.Item>
-                  <a
-                    className={clsx({
-                      active: lang === item,
-                    })}
-                    onClick={() => doSearch({ lang: item })}
-                  >
-                    {item}
-                  </a>
-                </List.Item>
-              )}
+              renderItem={(item) => {
+                const active = lang === item
+                return (
+                  <List.Item>
+                    {active ? (
+                      <span style={active ? activeStyle : null}>{item}</span>
+                    ) : (
+                      <FilterLink
+                        {...querys}
+                        query={query}
+                        lang={item}
+                        name={item}
+                        active={active}
+                      />
+                    )}
+                  </List.Item>
+                )
+              }}
             />
             <List
               bordered
@@ -119,17 +125,20 @@ function Search({ repos }) {
                 }
                 return (
                   <List.Item>
-                    <a
-                      className={clsx({ active })}
-                      onClick={() =>
-                        doSearch({
-                          sort: item.value,
-                          order: item.order,
-                        })
-                      }
-                    >
-                      {item.name}
-                    </a>
+                    {active ? (
+                      <span style={active ? activeStyle : null}>
+                        {item.name}
+                      </span>
+                    ) : (
+                      <FilterLink
+                        {...querys}
+                        query={query}
+                        sort={item.value}
+                        order={item.order}
+                        name={item.name}
+                        active={active}
+                      />
+                    )}
                   </List.Item>
                 )
               }}
@@ -139,9 +148,12 @@ function Search({ repos }) {
       </div>
       <style jsx>
         {`
-          .active {
-            border-left: 2px solid #e36209;
-            font-weight: 1000;
+          .Search {
+            padding: 2rem 0;
+          }
+          .list-header {
+            font-weight: 800;
+            font-size: 1.6rem;
           }
         `}
       </style>
