@@ -4,6 +4,7 @@ import { Row, Col, List } from "antd"
 import Link from "next/link"
 import clsx from "clsx"
 import api from "lib/universalApi"
+import { useCallback } from "react"
 
 const LANGUAGES = ["JavaScript", "HTML", "CSS", "TypeScript", "Java", "Python"]
 const SORT_TYPES = [
@@ -63,12 +64,22 @@ function Search({ repos }) {
 
   const { query, sort, order, lang } = router.query
 
-  const doSearch = (query) => {
-    router.push({
-      pathname: "/search",
-      query,
-    })
-  }
+  const doSearch = useCallback(
+    (queryConfig) => {
+      const baseQueryConfig = {
+        query,
+        sort,
+        order,
+        lang,
+      }
+      queryConfig = { ...baseQueryConfig, ...queryConfig }
+      router.push({
+        pathname: "/search",
+        query: queryConfig,
+      })
+    },
+    [query, sort, order, lang]
+  )
 
   return (
     <>
@@ -88,7 +99,7 @@ function Search({ repos }) {
                     className={clsx({
                       active: lang === item,
                     })}
-                    onClick={() => doSearch({ query, lang: item, sort, order })}
+                    onClick={() => doSearch({ lang: item })}
                   >
                     {item}
                   </a>
@@ -112,8 +123,6 @@ function Search({ repos }) {
                       className={clsx({ active })}
                       onClick={() =>
                         doSearch({
-                          query,
-                          lang,
                           sort: item.value,
                           order: item.order,
                         })
