@@ -8,10 +8,11 @@ import Layout from "./Layout"
 import PageLoading from "components/pageLoading"
 
 class MyApp extends App {
-  static async getInitialProps({ Component, ctx }) {
+  static async getInitialProps(appCtx) {
+    const { Component, ctx } = appCtx
     let appProps = {}
     if (Component.getInitialProps) {
-      const pageProps = await Component.getInitialProps(ctx)
+      const pageProps = await Component.getInitialProps(appCtx)
       appProps = { pageProps }
     }
     return appProps
