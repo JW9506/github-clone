@@ -1,4 +1,5 @@
 import { useRouter } from "next/router"
+import Head from "next/head"
 import { Row, Col, List } from "antd"
 import Link from "next/link"
 import clsx from "clsx"
@@ -62,76 +63,71 @@ function Search({ repos }) {
 
   const { query, sort, order, lang } = router.query
 
-  const handleLanguageChange = (language) => {
+  const doSearch = (query) => {
     router.push({
       pathname: "/search",
-      query: {
-        query,
-        lang: language,
-        sort,
-        order,
-      },
-    })
-  }
-
-  const handleSortChange = (sort) => {
-    router.push({
-      pathname: "/search",
-      query: {
-        query,
-        lang,
-        sort: sort.value,
-        order: sort.order,
-      },
+      query,
     })
   }
 
   return (
-    <div className="Search">
-      <Row gutter={20}>
-        <Col span={6}>
-          <List
-            bordered
-            header={<span className="list-header">Language</span>}
-            dataSource={LANGUAGES}
-            renderItem={(item) => (
-              <List.Item>
-                <a
-                  className={clsx({
-                    active: lang === item,
-                  })}
-                  onClick={() => handleLanguageChange(item)}
-                >
-                  {item}
-                </a>
-              </List.Item>
-            )}
-          />
-          <List
-            bordered
-            header={<span className="list-header">Order</span>}
-            dataSource={SORT_TYPES}
-            renderItem={(item) => {
-              let active = false
-              if (item.name === "Best Match" && !sort) {
-                active = true
-              } else if (item.value === sort && item.order === order) {
-                active = true
-              }
-              return (
+    <>
+      <Head>
+        <title>Github Clone Search</title>
+      </Head>
+      <div className="Search">
+        <Row gutter={20}>
+          <Col span={6}>
+            <List
+              bordered
+              header={<span className="list-header">Language</span>}
+              dataSource={LANGUAGES}
+              renderItem={(item) => (
                 <List.Item>
                   <a
-                    className={clsx({ active })}
-                    onClick={() => handleSortChange(item)}
+                    className={clsx({
+                      active: lang === item,
+                    })}
+                    onClick={() => doSearch({ query, lang: item, sort, order })}
                   >
-                    {item.name}
+                    {item}
                   </a>
                 </List.Item>
-              )
-            }}
-          />
-        </Col>
-      </Row>
+              )}
+            />
+            <List
+              bordered
+              header={<span className="list-header">Order</span>}
+              dataSource={SORT_TYPES}
+              renderItem={(item) => {
+                let active = false
+                if (item.name === "Best Match" && !sort) {
+                  active = true
+                } else if (item.value === sort && item.order === order) {
+                  active = true
+                }
+                return (
+                  <List.Item>
+                    <a
+                      className={clsx({ active })}
+                      onClick={() =>
+                        doSearch({
+                          query,
+                          lang,
+                          sort: item.value,
+                          order: item.order,
+                        })
+                      }
+                    >
+                      {item.name}
+                    </a>
+                  </List.Item>
+                )
+              }}
+            />
+          </Col>
+        </Row>
+      </div>
       <style jsx>
         {`
           .active {
@@ -140,7 +136,7 @@ function Search({ repos }) {
           }
         `}
       </style>
-    </div>
+    </>
   )
 }
 
