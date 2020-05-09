@@ -4,14 +4,20 @@ import { Button, Tabs } from "antd"
 import api from "lib/universalApi"
 import { connect } from "react-redux"
 import { useRouter } from "next/router"
+import LRUCache from "lru-cache"
+import { useEffect } from "react"
 
 const { publicRuntimeConfig } = config()
 const { OAUTH_URL } = publicRuntimeConfig
 import Repo from "components/Repo"
-import { useEffect } from "react"
+
+const isServer = typeof window === "undefined"
 
 let cachedUserRepos, cachedStarred
-const isServer = typeof window === "undefined"
+
+const cache = new LRUCache({
+  maxAge: 1000 * 10,
+})
 
 Home.getInitialProps = async (appCtx) => {
   const { ctx, reduxStore } = appCtx
@@ -22,6 +28,11 @@ Home.getInitialProps = async (appCtx) => {
   }
 
   let userRepos, starred
+
+  if (!isServer) {
+    cachedUserRepos = cache.get("userRepos")
+    cachedStarred = cache.get("starred")
+  }
 
   if (!cachedUserRepos) {
     const { data } = await api.request({ url: "/user/repos" }, ctx.req, ctx.res)
@@ -41,21 +52,16 @@ Home.getInitialProps = async (appCtx) => {
     starred = cachedStarred
   }
 
-  if (!isServer) {
-    cachedUserRepos = userRepos
-    cachedStarred = starred
-  }
-
   return { userRepos, starred }
 }
 
 function Home({ userInfo, userRepos, starred }) {
   useEffect(() => {
     if (!isServer) {
-      cachedUserRepos = userRepos
-      cachedStarred = starred
+      cache.set("userRepos", userRepos)
+      cache.set("starred", starred)
     }
-  }, [])
+  })
 
   const router = useRouter()
   const tabKey = router.query.key || "1"
