@@ -43,13 +43,16 @@ const MyLayout = ({ children, user, logout }) => {
     logout()
   }, [logout])
 
-  const handleGotoOAuth = useCallback(async (e) => {
-    e.preventDefault()
-    const response = await Axios.get(`/prepare-auth?url=${router.pathname}`)
-    if (response.status === 200) {
-      location.href = OAUTH_URL
-    }
-  }, [])
+  const handleGotoOAuth = useCallback(
+    async (e) => {
+      e.preventDefault()
+      const response = await Axios.get(`/prepare-auth?url=${router.asPath}`)
+      if (response.status === 200) {
+        location.href = OAUTH_URL
+      }
+    },
+    [router]
+  )
 
   const userDropDown = (
     <Menu>

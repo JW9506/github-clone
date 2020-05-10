@@ -161,9 +161,7 @@ function Search({ repos }) {
               }}
             />
           </Col>
-          {!repos ? (
-            <div>No result</div>
-          ) : (
+          {repos && repos.items ? (
             <Col span={18}>
               <h3 className="repos-title">Result count: {repos.total_count}</h3>
               {repos.items.map((repo) => (
@@ -188,6 +186,8 @@ function Search({ repos }) {
                 />
               </div>
             </Col>
+          ) : (
+            <div>No result</div>
           )}
         </Row>
       </div>
