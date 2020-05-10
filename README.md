@@ -22,3 +22,7 @@ yarn dev
 ## Preview
 
 ![image](https://i.ibb.co/rbtFZ1k/image.png)
+
+![image](https://i.ibb.co/y5NqX9R/image.png)
+
+![image](https://i.ibb.co/VCBrpKB/image.png)
