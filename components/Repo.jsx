@@ -21,7 +21,9 @@ const Repo = ({ repo }) => {
         </h3>
         <p className="repo-desc">{repo.description}</p>
         <p className="other-info">
-          <span className="license">{getLicense(repo.license)}</span>
+          {repo.license && (
+            <span className="license">{getLicense(repo.license)}</span>
+          )}
           <span className="last-updated">
             {getLastUpdated(repo.updated_at)}
           </span>
@@ -50,7 +52,7 @@ const Repo = ({ repo }) => {
           text-align: right;
         }
         .other-info > span:not(:first-child) {
-          margin-right: 1rem;
+          margin-left: 1rem;
         }
         .repo-desc {
           width: 40rem;

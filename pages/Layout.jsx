@@ -16,7 +16,7 @@ import Container from "components/container"
 import { logout } from "reduxStore/user"
 
 const githubIconStyle = {
-  fontSize: "2.5rem",
+  fontSize: "4rem",
   color: "white",
   marginRight: "1rem",
 }
