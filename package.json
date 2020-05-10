@@ -3,12 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "nodemon server.js -w server.js -w lib",
+    "dev": "nodemon -x babel-node server.js -w server.js -w lib",
     "build": "next build",
     "start": "next start"
   },
   "dependencies": {
     "@ant-design/icons": "^4.1.0",
+    "@babel/core": "^7.0.0",
+    "@babel/node": "^7.8.7",
     "@reduxjs/toolkit": "^1.3.5",
     "@types/ioredis": "^4.16.0",
     "@types/koa": "^2.11.3",
