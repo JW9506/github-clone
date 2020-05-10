@@ -3,6 +3,7 @@ const Router = require("koa-router")
 const session = require("koa-session")
 const koaBody = require("koa-body")
 const IORedis = require("ioredis")
+const atob = require("atob")
 const auth = require("./lib/auth")
 const { default: next } = require("next")
 
@@ -16,6 +17,7 @@ const handle = app.getRequestHandler()
 
 const redis = new IORedis()
 
+global.atob = atob
 ;(async () => {
   await app.prepare()
   const server = new Koa()
