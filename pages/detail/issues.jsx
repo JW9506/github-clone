@@ -4,6 +4,7 @@ import { Avatar, Button } from "antd"
 import dynamic from "next/dynamic"
 import api from "lib/universalApi"
 
+import SearchUser from "components/searchUser"
 import { getLastUpdated } from "lib/util"
 
 const MarkdownRenderer = dynamic(
@@ -122,15 +123,21 @@ Issues.getInitialProps = async (appCtx) => {
 }
 
 function Issues({ issues }) {
-  if (typeof window !== "undefined") {
-    console.log(issues)
-  }
+  const [creator, setCreator] = useState("")
+
+  const handleCreatorChange = useCallback((value) => {
+    setCreator(value)
+  }, [])
+
   if (!issues) return <div>Fetch issues failed</div>
   return (
-    <div className="Issues">
-      {issues.map((issue) => (
-        <IssueItem key={issue.id} issue={issue} />
-      ))}
+    <div>
+      <SearchUser onChange={handleCreatorChange} value={creator} />
+      <div className="Issues">
+        {issues.map((issue) => (
+          <IssueItem key={issue.id} issue={issue} />
+        ))}
+      </div>
       <style jsx>{`
         .Issues {
           border: 1px solid #eee;
