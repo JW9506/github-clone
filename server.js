@@ -24,12 +24,16 @@ const redis = new IORedis()
   server.keys = ["mysessionkey1995"]
   const SESSION_CONFIG = {
     key: "sess",
-    maxAge: 3600 * 1000,
+    maxAge: 1800 * 1000,
     store: new RedisSessionStore(redis),
   }
 
   server.use(koaBody())
   server.use(session(SESSION_CONFIG, server))
+  server.use(async (ctx, next) => {
+    ctx.req.session = ctx.session
+    await next()
+  })
 
   auth(server)
   api(server)
@@ -37,7 +41,6 @@ const redis = new IORedis()
   // server.use(router.routes())
 
   server.use(async (ctx, next) => {
-    ctx.req.session = ctx.session
     await handle(ctx.req, ctx.res)
     ctx.respond = false
   })

@@ -16,7 +16,7 @@ const isServer = typeof window === "undefined"
 let cachedUserRepos, cachedStarred
 
 const cache = new LRUCache({
-  maxAge: 1000 * 10,
+  maxAge: 1800 * 1000,
 })
 
 Home.getInitialProps = async (appCtx) => {
@@ -35,7 +35,12 @@ Home.getInitialProps = async (appCtx) => {
   }
 
   if (!cachedUserRepos) {
-    const { data } = await api.request({ url: "/user/repos" }, ctx.req, ctx.res)
+    const { data } = await api.request(
+      { url: "/user/repos" },
+      ctx.req,
+      ctx.res,
+      reduxStore
+    )
     userRepos = data
   } else {
     userRepos = cachedUserRepos
@@ -45,7 +50,8 @@ Home.getInitialProps = async (appCtx) => {
     const { data } = await api.request(
       { url: "/user/starred" },
       ctx.req,
-      ctx.res
+      ctx.res,
+      reduxStore
     )
     starred = data
   } else {
@@ -85,14 +91,16 @@ function Home({ userInfo, userRepos, starred }) {
           onChange={handleTabChange}
         >
           <Tabs.TabPane tab="Repo" key="1">
-            {userRepos.map((repo) => (
-              <Repo key={Math.random().toString().slice(2)} repo={repo} />
-            ))}
+            {userRepos &&
+              userRepos.map((repo) => (
+                <Repo key={Math.random().toString().slice(2)} repo={repo} />
+              ))}
           </Tabs.TabPane>
           <Tabs.TabPane tab="Watching" key="2">
-            {starred.map((repo) => (
-              <Repo key={Math.random().toString().slice(2)} repo={repo} />
-            ))}
+            {starred &&
+              starred.map((repo) => (
+                <Repo key={Math.random().toString().slice(2)} repo={repo} />
+              ))}
           </Tabs.TabPane>
         </Tabs>
       </div>
