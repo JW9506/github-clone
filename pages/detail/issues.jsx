@@ -3,7 +3,8 @@ import { useState, useCallback } from "react"
 import { Avatar, Button } from "antd"
 import dynamic from "next/dynamic"
 import api from "lib/universalApi"
-import moment from "moment"
+
+import { getLastUpdated } from "lib/util"
 
 const MarkdownRenderer = dynamic(
   () =>
@@ -14,10 +15,6 @@ const MarkdownRenderer = dynamic(
     loading: () => <div>Markdown Renderer currently loading</div>,
   }
 )
-
-function getLastUpdated(time) {
-  return moment(time).fromNow()
-}
 
 function IssueDetail({ issue }) {
   return (
