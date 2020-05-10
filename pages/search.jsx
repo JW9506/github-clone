@@ -3,10 +3,12 @@ import Head from "next/head"
 import { Row, Col, List, Pagination } from "antd"
 import Link from "next/link"
 import api from "lib/universalApi"
-import { memo, isValidElement } from "react"
+import { memo, isValidElement, useEffect } from "react"
 
 import Repo from "components/Repo"
+import { cacheArray } from "lib/repoBasicCache"
 
+const isServer = typeof window === "undefined"
 const LANGUAGES = ["JavaScript", "HTML", "CSS", "TypeScript", "Java", "Python"]
 const SORT_TYPES = [
   {
@@ -95,6 +97,10 @@ function Search({ repos }) {
 
   const { ...querys } = router.query
   const { query, sort, order, lang, page } = router.query
+
+  useEffect(() => {
+    if (!isServer && repos) cacheArray(repos.items)
+  })
 
   return (
     <>

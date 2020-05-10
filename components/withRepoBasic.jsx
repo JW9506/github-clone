@@ -2,6 +2,10 @@ import Repo from "components/Repo"
 import Link from "next/link"
 import { useRouter } from "next/router"
 import api from "lib/universalApi"
+import { get, cache } from "lib/repoBasicCache"
+import { useEffect } from "react"
+
+const isServer = typeof window === "undefined"
 
 function makeQuery(queryObject) {
   const query = Object.entries(queryObject)
@@ -21,19 +25,31 @@ const WithRepoBasic = (Comp, type = "index") => {
     }
     const { ctx, reduxStore } = appCtx
     const { owner, name } = ctx.query
-    const { data: repoBasic } = await api.request(
-      {
-        url: `/repos/${owner}/${name}`,
-      },
-      ctx.req,
-      ctx.res,
-      reduxStore
-    )
+
+    let repoBasic
+    const full_name = `${owner}/${name}`
+
+    if (get(full_name)) {
+      repoBasic = get(full_name)
+    } else {
+      const { data } = await api.request(
+        {
+          url: `/repos/${owner}/${name}`,
+        },
+        ctx.req,
+        ctx.res,
+        reduxStore
+      )
+      repoBasic = data
+    }
+
     return { repoBasic, ...compProps }
   }
 
   function withDetail({ repoBasic, ...restProps }) {
-    if (typeof window !== "undefined") console.log(repoBasic)
+    useEffect(() => {
+      if (!isServer) cache(repoBasic)
+    })
     const router = useRouter()
     const query = makeQuery(router.query)
     return (

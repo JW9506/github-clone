@@ -7,6 +7,7 @@ import { useRouter } from "next/router"
 import LRUCache from "lru-cache"
 import { useEffect } from "react"
 
+import { cacheArray } from "lib/repoBasicCache"
 const { publicRuntimeConfig } = config()
 const { OAUTH_URL } = publicRuntimeConfig
 import Repo from "components/Repo"
@@ -66,6 +67,8 @@ function Home({ userInfo, userRepos, starred }) {
     if (!isServer) {
       cache.set("userRepos", userRepos)
       cache.set("starred", starred)
+      if (userRepos) cacheArray(userRepos)
+      if (starred) cacheArray(starred)
     }
   })
 
