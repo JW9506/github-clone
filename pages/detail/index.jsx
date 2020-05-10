@@ -1,6 +1,16 @@
 import withRepoBasic from "components/withRepoBasic"
 import api from "lib/universalApi"
-import MarkdownRenderer from "components/markdownRenderer"
+import dynamic from "next/dynamic"
+
+const MarkdownRenderer = dynamic(
+  () =>
+    import(
+      /* webpackChunkName: "markdownrenderer" */ "components/markdownRenderer"
+    ),
+  {
+    loading: () => <div>Markdown Renderer currently loading</div>,
+  }
+)
 
 Detail.getInitialProps = async (appCtx) => {
   const { ctx, reduxStore } = appCtx
@@ -17,6 +27,7 @@ Detail.getInitialProps = async (appCtx) => {
   return { readme }
 }
 function Detail({ readme }) {
+  if (!readme) return <p>Readme does not exist in this repository</p>
   return <MarkdownRenderer content={readme.content} base64 />
 }
 
