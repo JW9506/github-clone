@@ -9,6 +9,16 @@
 
 ## Getting Started
 
+### create `.env.development.local`
+
+- provide `client_id` and `client_secret` which can be obtained for free in `Settings` > `Developer settings` in Github
+
+### then
+
 ```bash
 yarn dev
 ```
+
+## Preview
+
+![image](https://i.ibb.co/rbtFZ1k/image.png)
