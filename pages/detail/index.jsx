@@ -1,13 +1,6 @@
 import withRepoBasic from "components/withRepoBasic"
-import MarkdownIt from "markdown-it"
-import "github-markdown-css"
 import api from "lib/universalApi"
-
-const md = new MarkdownIt({ html: true, linkify: true })
-
-function b64_to_utf8(str) {
-  return decodeURIComponent(escape(atob(str)))
-}
+import MarkdownRenderer from "components/markdownRenderer"
 
 Detail.getInitialProps = async (appCtx) => {
   const { ctx, reduxStore } = appCtx
@@ -24,13 +17,7 @@ Detail.getInitialProps = async (appCtx) => {
   return { readme }
 }
 function Detail({ readme }) {
-  const content = b64_to_utf8(readme.content)
-  const html = md.render(content)
-  return (
-    <div className="markdown-body">
-      <div dangerouslySetInnerHTML={{ __html: html }}></div>
-    </div>
-  )
+  return <MarkdownRenderer content={readme.content} base64 />
 }
 
 export default withRepoBasic(Detail, "index")
