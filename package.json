@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "nodemon -x babel-node server.js -w server.js -w lib",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "analyze:browser": "cross-env ANALYZE=true yarn build"
   },
   "dependencies": {
     "@ant-design/icons": "^4.1.0",
