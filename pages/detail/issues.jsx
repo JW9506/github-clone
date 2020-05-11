@@ -4,10 +4,11 @@ import { Avatar, Button, Select, Spin } from "antd"
 import dynamic from "next/dynamic"
 import api from "lib/universalApi"
 
-const GITHUB_BASE_URL = "https://api.github.com"
-
 import SearchUser from "components/searchUser"
 import { getLastUpdated } from "lib/util"
+
+const GITHUB_BASE_URL = "https://api.github.com"
+const isServer = typeof window === "undefined"
 
 const MarkdownRenderer = dynamic(
   () =>
@@ -119,6 +120,8 @@ function makeQuery(creator, state, labels) {
     .join("&")}`
 }
 
+const labelCache = {}
+
 const Option = Select.Option
 
 Issues.getInitialProps = async (appCtx) => {
@@ -134,16 +137,21 @@ Issues.getInitialProps = async (appCtx) => {
   )
   const initialIssues = issuesResp.data
 
-  const labelsResp = await api.request(
-    {
-      // endpoint error if request from server
-      url: `/repos/${owner}/${name}/labels`,
-    },
-    ctx.req,
-    ctx.res,
-    reduxStore
-  )
-  const initialLabels = labelsResp.data
+  let initialLabels
+  if (isServer) {
+    const labelsResp = await api.request(
+      {
+        // endpoint error if request from server
+        url: `/repos/${owner}/${name}/labels`,
+      },
+      ctx.req,
+      ctx.res,
+      reduxStore
+    )
+    initialLabels = labelsResp.data
+  } else {
+    initialLabels = labelCache[`${owner}/${name}`]
+  }
 
   return { initialIssues, initialLabels, name, owner }
 }
@@ -158,7 +166,8 @@ function Issues({ initialIssues, initialLabels, name, owner }) {
           const labelsResp = await fetch(
             `${GITHUB_BASE_URL}/repos/${owner}/${name}/labels`
           )
-          setLabels(await labelsResp.json())
+          labelCache[`${owner}/${name}`] = await labelsResp.json()
+          setLabels(labelCache[`${owner}/${name}`])
         } catch (error) {
           console.error(error)
         }
