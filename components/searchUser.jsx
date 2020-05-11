@@ -18,8 +18,6 @@ function SearchUser({ onChange, value }) {
 
   const fetchUser = useCallback(
     debounce(async (value) => {
-      console.log("Search, fetch", value)
-
       lastFetchIdRef.current += 1
       const fetchId = lastFetchIdRef.current
 

@@ -1,8 +1,10 @@
 import withRepoBasic from "components/withRepoBasic"
-import { useState, useCallback } from "react"
-import { Avatar, Button, Select } from "antd"
+import { useState, useCallback, useEffect } from "react"
+import { Avatar, Button, Select, Spin } from "antd"
 import dynamic from "next/dynamic"
 import api from "lib/universalApi"
+
+const GITHUB_BASE_URL = "https://api.github.com"
 
 import SearchUser from "components/searchUser"
 import { getLastUpdated } from "lib/util"
@@ -107,6 +109,18 @@ function IssueItem({ issue }) {
   )
 }
 
+function makeQuery(creator, state, labels) {
+  return `?${[
+    creator && `creator=${creator}`,
+    state && `state=${state}`,
+    labels && labels.length > 0 && `labels=${labels.join(",")}`,
+  ]
+    .filter(Boolean)
+    .join("&")}`
+}
+
+const Option = Select.Option
+
 Issues.getInitialProps = async (appCtx) => {
   const { ctx, reduxStore } = appCtx
   const { owner, name } = ctx.query
@@ -122,25 +136,37 @@ Issues.getInitialProps = async (appCtx) => {
 
   const labelsResp = await api.request(
     {
-      // endpoint error
+      // endpoint error if request from server
       url: `/repos/${owner}/${name}/labels`,
     },
     ctx.req,
     ctx.res,
     reduxStore
   )
-  const labels = labelsResp.data
+  const initialLabels = labelsResp.data
 
-  return { initialIssues, labels }
+  return { initialIssues, initialLabels, name, owner }
 }
 
-const Option = Select.Option
+function Issues({ initialIssues, initialLabels, name, owner }) {
+  const [labels, setLabels] = useState(initialLabels || [])
 
-function Issues({ initialIssues, labels }) {
-  if (typeof window !== "undefined") {
-    console.log(labels)
-  }
+  useEffect(() => {
+    if (labels.length === 0) {
+      ;(async () => {
+        try {
+          const labelsResp = await fetch(
+            `${GITHUB_BASE_URL}/repos/${owner}/${name}/labels`
+          )
+          setLabels(await labelsResp.json())
+        } catch (error) {
+          console.error(error)
+        }
+      })()
+    }
+  }, [labels, owner, name])
 
+  const [isFetching, setFetching] = useState(false)
   const [creator, setCreator] = useState("")
   const [state, setState] = useState("")
   const [label, setLabel] = useState([])
@@ -158,7 +184,14 @@ function Issues({ initialIssues, labels }) {
     setLabel(value)
   }, [])
 
-  const handleSearch = () => {}
+  const handleSearch = useCallback(async () => {
+    setFetching(true)
+    const issueSearchResp = await api.request({
+      url: `/repos/${owner}/${name}/issues${makeQuery(creator, state, label)}`,
+    })
+    setFetching(false)
+    setIssues(issueSearchResp.data)
+  }, [owner, name, makeQuery, creator, state, label])
 
   return (
     <div>
@@ -170,18 +203,18 @@ function Issues({ initialIssues, labels }) {
           onChange={handleStateChange}
           value={state}
         >
-          <Option value="All">All</Option>
-          <Option value="Open">Open</Option>
-          <Option value="Closed">Closed</Option>
+          <Option value="all">All</Option>
+          <Option value="open">Open</Option>
+          <Option value="closed">Closed</Option>
         </Select>
         <Select
           mode="multiple"
           style={{ width: "17rem", marginLeft: "1rem", flexGrow: 1 }}
           placeholder="Label"
           onChange={handleLabelChange}
-          value={labels}
+          value={label}
         >
-          {labels &&
+          {labels.length !== 0 &&
             labels.map((label) => (
               <Option key={label.id} value={label.name}>
                 {label.name}
@@ -196,11 +229,17 @@ function Issues({ initialIssues, labels }) {
           Search
         </Button>
       </div>
-      <div className="Issues">
-        {issues.map((issue) => (
-          <IssueItem key={issue.id} issue={issue} />
-        ))}
-      </div>
+      {isFetching ? (
+        <div className="loading">
+          <Spin />
+        </div>
+      ) : (
+        <div className="Issues">
+          {issues.map((issue) => (
+            <IssueItem key={issue.id} issue={issue} />
+          ))}
+        </div>
+      )}
       <style jsx>{`
         .Issues {
           border: 1px solid #eee;
@@ -209,6 +248,13 @@ function Issues({ initialIssues, labels }) {
         }
         .search {
           display: flex;
+          align-items: center;
+        }
+        .loading {
+          display: flex;
+          height: 40rem;
+          justify-content: center;
+          align-items: center;
         }
       `}</style>
     </div>
