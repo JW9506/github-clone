@@ -1,6 +1,6 @@
 import withRepoBasic from "components/withRepoBasic"
 import { useState, useCallback } from "react"
-import { Avatar, Button } from "antd"
+import { Avatar, Button, Select } from "antd"
 import dynamic from "next/dynamic"
 import api from "lib/universalApi"
 
@@ -110,7 +110,7 @@ function IssueItem({ issue }) {
 Issues.getInitialProps = async (appCtx) => {
   const { ctx, reduxStore } = appCtx
   const { owner, name } = ctx.query
-  const { data } = await api.request(
+  const issuesResp = await api.request(
     {
       url: `/repos/${owner}/${name}/issues`,
     },
@@ -118,21 +118,84 @@ Issues.getInitialProps = async (appCtx) => {
     ctx.res,
     reduxStore
   )
-  const issues = data
-  return { issues }
+  const initialIssues = issuesResp.data
+
+  const labelsResp = await api.request(
+    {
+      // endpoint error
+      url: `/repos/${owner}/${name}/labels`,
+    },
+    ctx.req,
+    ctx.res,
+    reduxStore
+  )
+  const labels = labelsResp.data
+
+  return { initialIssues, labels }
 }
 
-function Issues({ issues }) {
+const Option = Select.Option
+
+function Issues({ initialIssues, labels }) {
+  if (typeof window !== "undefined") {
+    console.log(labels)
+  }
+
   const [creator, setCreator] = useState("")
+  const [state, setState] = useState("")
+  const [label, setLabel] = useState([])
+  const [issues, setIssues] = useState(initialIssues || [])
 
   const handleCreatorChange = useCallback((value) => {
     setCreator(value)
   }, [])
 
-  if (!issues) return <div>Fetch issues failed</div>
+  const handleStateChange = useCallback((value) => {
+    setState(value)
+  }, [])
+
+  const handleLabelChange = useCallback((value) => {
+    setLabel(value)
+  }, [])
+
+  const handleSearch = () => {}
+
   return (
     <div>
-      <SearchUser onChange={handleCreatorChange} value={creator} />
+      <div className="search">
+        <SearchUser onChange={handleCreatorChange} value={creator} />
+        <Select
+          style={{ width: "10rem", marginLeft: "1rem" }}
+          placeholder="Status"
+          onChange={handleStateChange}
+          value={state}
+        >
+          <Option value="All">All</Option>
+          <Option value="Open">Open</Option>
+          <Option value="Closed">Closed</Option>
+        </Select>
+        <Select
+          mode="multiple"
+          style={{ width: "17rem", marginLeft: "1rem", flexGrow: 1 }}
+          placeholder="Label"
+          onChange={handleLabelChange}
+          value={labels}
+        >
+          {labels &&
+            labels.map((label) => (
+              <Option key={label.id} value={label.name}>
+                {label.name}
+              </Option>
+            ))}
+        </Select>
+        <Button
+          style={{ marginLeft: "1rem" }}
+          type="primary"
+          onClick={handleSearch}
+        >
+          Search
+        </Button>
+      </div>
       <div className="Issues">
         {issues.map((issue) => (
           <IssueItem key={issue.id} issue={issue} />
@@ -143,6 +206,9 @@ function Issues({ issues }) {
           border: 1px solid #eee;
           border-radius: 0.5rem;
           margin-bottom: 2rem;
+        }
+        .search {
+          display: flex;
         }
       `}</style>
     </div>
